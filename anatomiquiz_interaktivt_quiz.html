@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anatomiquiz - Muskler & Skelett</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-indigo-700 text-white shadow-md">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">Anatomiquiz</h1>
+        <p class="text-indigo-200 text-xs sm:text-sm">Träna på alla muskler & ben utifrån ditt anatomihäfte</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="nav-quiz-btn" onclick="switchView('quiz')" class="px-4 py-2 rounded-lg text-sm font-semibold bg-white text-indigo-700 shadow-sm transition hover:bg-indigo-50">
+          Quiz
+        </button>
+        <button id="nav-study-btn" onclick="switchView('study')" class="px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-600 transition">
+          Studielista
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6">
+
+    <!-- QUIZ VIEW -->
+    <div id="quiz-view" class="space-y-6">
+
+      <!-- Setup Box -->
+      <div id="setup-box" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <h2 class="text-xl font-bold mb-4 text-slate-800">Välj vad du vill öva på</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          <button onclick="selectCategory('all')" id="cat-all" class="cat-btn border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-600">
+            <div class="text-lg">Alla frågor</div>
+            <div class="text-xs text-indigo-500 font-normal mt-1">43 frågor totalt</div>
+          </button>
+          <button onclick="selectCategory('muscles')" id="cat-muscles" class="cat-btn border-2 border-slate-200 bg-white text-slate-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-300">
+            <div class="text-lg">Endast Muskler</div>
+            <div class="text-xs text-slate-500 font-normal mt-1">24 muskler (siffra 1-24)</div>
+          </button>
+          <button onclick="selectCategory('skeleton')" id="cat-skeleton" class="cat-btn border-2 border-slate-200 bg-white text-slate-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-300">
+            <div class="text-lg">Endast Skelett</div>
+            <div class="text-xs text-slate-500 font-normal mt-1">19 ben/strukturer (1-19)</div>
+          </button>
+        </div>
+
+        <button onclick="startQuiz()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition transform active:scale-[0.99]">
+          Starta Quizet
+        </button>
+      </div>
+
+      <!-- Active Quiz Card -->
+      <div id="card-box" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 relative">
+        
+        <!-- Top bar: Progress & Score -->
+        <div class="flex justify-between items-center mb-4 text-sm font-medium text-slate-500">
+          <span id="question-count">Fråga 1 av 10</span>
+          <span id="score-counter" class="text-indigo-600 font-semibold">Poäng: 0</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-100 rounded-full h-2.5 mb-6 overflow-hidden">
+          <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <!-- Question Title -->
+        <div class="mb-6">
+          <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2" id="badge-category">
+            Muskeltabell
+          </div>
+          <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800">
+            Vilken muskel motsvaras av siffra 3?
+          </h2>
+          <p id="question-subtext" class="text-slate-500 text-sm mt-1">
+            Svenskt namn: Tvåhövdade armböjaren
+          </p>
+        </div>
+
+        <!-- Options Container -->
+        <div id="options-container" class="grid grid-cols-1 gap-3 mb-6">
+          <!-- Dynamiskt skapade alternativ -->
+        </div>
+
+        <!-- Explanation / Feedback Box -->
+        <div id="feedback-box" class="hidden p-4 rounded-xl mb-6 text-sm">
+          <div id="feedback-title" class="font-bold mb-1"></div>
+          <div id="feedback-detail" class="text-slate-600"></div>
+        </div>
+
+        <!-- Next Button -->
+        <button id="next-btn" onclick="nextQuestion()" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition">
+          Nästa fråga →
+        </button>
+      </div>
+
+      <!-- Results View -->
+      <div id="result-box" class="hidden bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-100 text-indigo-600 text-3xl mb-4 font-extrabold" id="result-emoji">
+          🏆
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800 mb-2">Quizet är klart!</h2>
+        <p class="text-slate-600 mb-6">Du fick <span id="final-score" class="font-bold text-indigo-600">0</span> av <span id="final-total">0</span> rätt (<span id="final-percent">0%</span>).</p>
+
+        <!-- Result Breakdown list -->
+        <div class="text-left mb-6 max-h-80 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 p-2" id="summary-list">
+          <!-- Dynamisk sammanfattning -->
+        </div>
+
+        <button onclick="resetQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition">
+          Kör igen
+        </button>
+      </div>
+
+    </div>
+
+    <!-- STUDY LIST VIEW -->
+    <div id="study-view" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">Studielista för häftet</h2>
+            <p class="text-slate-500 text-sm">Sök eller bläddra bland alla muskler och ben</p>
+          </div>
+          <input type="text" id="study-search" oninput="renderStudyList()" placeholder="Sök muskel/ben/siffra..." class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="study-cards-container">
+          <!-- Skapas dynamiskt -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="bg-slate-200 border-t border-slate-300 py-4 text-center text-xs text-slate-500 mt-auto">
+    Anatomiquiz baserat på Idrott och Hälsa 1 & 2 häftet
+  </footer>
+
+  <script>
+    // DATA FRÅN HÄFTET
+    const anatomyData = [
+      // MUSKLER (1-24)
+      { id: 'm1', type: 'muscle', num: 1, latin: 'Handledens flexorer', swe: '', origin: 'Radius, Ulna', insertion: 'Manus', action: 'Flexion i handleden' },
+      { id: 'm2', type: 'muscle', num: 2, latin: 'Handledens extensorer', swe: '', origin: 'Radius, Ulna', insertion: 'Manus', action: 'Extension i handleden' },
+      { id: 'm3', type: 'muscle', num: 3, latin: 'Biceps', swe: 'Tvåhövdade armböjaren', origin: 'Scapula', insertion: 'Radius', action: 'Flexion och supination i armbågsleden' },
+      { id: 'm4', type: 'muscle', num: 4, latin: 'Triceps', swe: 'Trehövdade armsträckaren', origin: 'Scapula, Humerus', insertion: 'Ulna', action: 'Extension i armbågsleden' },
+      { id: 'm5', type: 'muscle', num: 5, latin: 'Deltoideus', swe: 'Deltamuskeln', origin: 'Clavicula, Scapula', insertion: 'Humerus', action: 'Abduktion, flexion, extension av axelleden' },
+      { id: 'm6', type: 'muscle', num: 6, latin: 'Pectoralis Major', swe: 'Stora bröstmuskeln', origin: 'Clavicula, Sternum, Costae', insertion: 'Humerus', action: 'Flexion, adduktion och inåtrotation av axelleden' },
+      { id: 'm7', type: 'muscle', num: 7, latin: 'Trapezius', swe: 'Kappmuskeln', origin: 'Columna Vertebralis, Cranium', insertion: 'Scapula, Clavicula', action: 'Elevation, adduktion och rotation av skulderbladet' },
+      { id: 'm8', type: 'muscle', num: 8, latin: 'Rectus Abdominis', swe: 'Raka bukmuskeln', origin: 'Pelvis', insertion: 'Sternum, Costae', action: 'Flexion i bålen' },
+      { id: 'm9', type: 'muscle', num: 9, latin: 'Obliquus Externus Abdominis', swe: 'Yttre sneda bukmuskeln', origin: 'Costae', insertion: 'Pelvis', action: 'Flexion och rotation i bålen' },
+      { id: 'm10', type: 'muscle', num: 10, latin: 'Iliopsoas', swe: 'Höftböjaren', origin: 'Columna Vertebralis, Pelvis', insertion: 'Femur', action: 'Flexion i höftleden' },
+      { id: 'm11', type: 'muscle', num: 11, latin: 'Quadriceps', swe: 'Fyrhövdade lärmuskeln', origin: 'Pelvis, Femur', insertion: 'Tibia', action: 'Extension i knäleden, flexion i höftleden' },
+      { id: 'm12', type: 'muscle', num: 12, latin: 'Serratus Anterior', swe: 'Främre sågmuskeln', origin: 'Scapula', insertion: 'Costae', action: 'Abduktion och utåtrotation av skulderbladet' },
+      { id: 'm13', type: 'muscle', num: 13, latin: 'Sartorius', swe: 'Skräddarmuskeln', origin: 'Pelvis', insertion: 'Tibia', action: 'Flexion och utåtrotation i höften, flexion i knäet' },
+      { id: 'm14', type: 'muscle', num: 14, latin: 'Latissimus Dorsi', swe: 'Breda ryggmuskeln', origin: 'Columna Vertebralis, Pelvis', insertion: 'Humerus', action: 'Extension, adduktion och inåtrotation av axelleden' },
+      { id: 'm15', type: 'muscle', num: 15, latin: 'Teres Major', swe: '', origin: 'Scapula', insertion: 'Humerus', action: 'Inåtrotation, adduktion och extension i axelleden' },
+      { id: 'm16', type: 'muscle', num: 16, latin: 'Infraspinatus', swe: '', origin: 'Scapula', insertion: 'Humerus', action: 'Utåtrotation och extension i axelleden' },
+      { id: 'm17', type: 'muscle', num: 17, latin: 'Gluteus Maximus', swe: 'Sätesmuskeln', origin: 'Columna Vertebralis, Pelvis', insertion: 'Femur, Tibia', action: 'Extension, adduktion och utåtrotation i höften' },
+      { id: 'm18', type: 'muscle', num: 18, latin: 'Tensor Fasciae Latae', swe: 'Lårfascians spännare', origin: 'Pelvis', insertion: 'Femur, Tibia', action: 'Flexion, abduktion och rotation i höften' },
+      { id: 'm19', type: 'muscle', num: 19, latin: 'Hamstrings', swe: 'Bakre lärmuskeln', origin: 'Pelvis, Femur', insertion: 'Tibia, Fibula', action: 'Extension i höften, flexion i knäet' },
+      { id: 'm20', type: 'muscle', num: 20, latin: 'Gracilis', swe: 'Smala lärmuskeln', origin: 'Pelvis', insertion: 'Tibia', action: 'Adduktion och flexion i höften, flexion i knäet' },
+      { id: 'm21', type: 'muscle', num: 21, latin: 'Adductor Longus', swe: 'Långa inåtförarmuskeln', origin: 'Pelvis', insertion: 'Femur', action: 'Adduktion och flexion i höften' },
+      { id: 'm22', type: 'muscle', num: 22, latin: 'Gastrocnemius', swe: 'Tvillingvadmuskeln', origin: 'Femur', insertion: 'Calcaneus', action: 'Flexion i knäet, vinkla foten nedåt' },
+      { id: 'm23', type: 'muscle', num: 23, latin: 'Soleus', swe: 'Djupa vadmuskeln', origin: 'Tibia, Fibula', insertion: 'Calcaneus', action: 'Vinkla foten nedåt (plantarflexion)' },
+      { id: 'm24', type: 'muscle', num: 24, latin: 'Tibialis Anterior', swe: 'Främre skenbensmuskeln', origin: 'Tibia', insertion: 'Pedis', action: 'Vinkla foten uppåt (dorsalflexion)' },
+
+      // SKELETTET (1-19)
+      { id: 's1', type: 'skeleton', num: 1, latin: 'Kranium', swe: 'Skallben', action: 'Skelettdel' },
+      { id: 's2', type: 'skeleton', num: 2, latin: 'Sternum', swe: 'Bröstben', action: 'Skelettdel' },
+      { id: 's3', type: 'skeleton', num: 3, latin: 'Costae', swe: 'Revben', action: 'Skelettdel' },
+      { id: 's4', type: 'skeleton', num: 4, latin: 'Columna Vertebralis', swe: 'Ryggrad', action: 'Skelettdel' },
+      { id: 's5', type: 'skeleton', num: 5, latin: 'Clavicula', swe: 'Nyckelben', action: 'Skelettdel' },
+      { id: 's6', type: 'skeleton', num: 6, latin: 'Scapula', swe: 'Skulderblad', action: 'Skelettdel' },
+      { id: 's7', type: 'skeleton', num: 7, latin: 'Pelvis', swe: 'Bäcken', action: 'Skelettdel' },
+      { id: 's8', type: 'skeleton', num: 8, latin: 'Humerus', swe: 'Överarmsben', action: 'Skelettdel' },
+      { id: 's9', type: 'skeleton', num: 9, latin: 'Radius', swe: 'Strålben', action: 'Skelettdel' },
+      { id: 's10', type: 'skeleton', num: 10, latin: 'Ulna', swe: 'Armbågsben', action: 'Skelettdel' },
+      { id: 's11', type: 'skeleton', num: 11, latin: 'Os ischii', swe: 'Sittben', action: 'Skelettdel' },
+      { id: 's12', type: 'skeleton', num: 12, latin: 'Femur', swe: 'Lårben', action: 'Skelettdel' },
+      { id: 's13', type: 'skeleton', num: 13, latin: 'Patella', swe: 'Knäskål', action: 'Skelettdel' },
+      { id: 's14', type: 'skeleton', num: 14, latin: 'Tibia', swe: 'Skenben', action: 'Skelettdel' },
+      { id: 's15', type: 'skeleton', num: 15, latin: 'Fibula', swe: 'Vadben', action: 'Skelettdel' },
+      { id: 's16', type: 'skeleton', num: 16, latin: 'Talus', swe: 'Språngben', action: 'Skelettdel' },
+      { id: 's17', type: 'skeleton', num: 17, latin: 'Calcaneus', swe: 'Hälben', action: 'Skelettdel' },
+      { id: 's18', type: 'skeleton', num: 18, latin: 'Manus', swe: 'Hand', action: 'Skelettdel' },
+      { id: 's19', type: 'skeleton', num: 19, latin: 'Pedis', swe: 'Fot', action: 'Skelettdel' }
+    ];
+
+    // State Variables
+    let selectedCat = 'all';
+    let quizQueue = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    let history = [];
+
+    function selectCategory(cat) {
+      selectedCat = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+        btn.classList.add('border-slate-200', 'bg-white', 'text-slate-700');
+      });
+      const activeBtn = document.getElementById(`cat-${cat}`);
+      activeBtn.classList.remove('border-slate-200', 'bg-white', 'text-slate-700');
+      activeBtn.classList.add('border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+    }
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startQuiz() {
+      let filtered = [...anatomyData];
+      if (selectedCat === 'muscles') {
+        filtered = filtered.filter(item => item.type === 'muscle');
+      } else if (selectedCat === 'skeleton') {
+        filtered = filtered.filter(item => item.type === 'skeleton');
+      }
+
+      quizQueue = shuffle(filtered);
+      currentIndex = 0;
+      score = 0;
+      history = [];
+
+      document.getElementById('setup-box').classList.add('hidden');
+      document.getElementById('result-box').classList.add('hidden');
+      document.getElementById('card-box').classList.remove('hidden');
+
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      answered = false;
+      const current = quizQueue[currentIndex];
+      const total = quizQueue.length;
+
+      // Update counters
+      document.getElementById('question-count').innerText = `Fråga ${currentIndex + 1} av ${total}`;
+      document.getElementById('score-counter').innerText = `Poäng: ${score}`;
+      document.getElementById('progress-bar').style.width = `${((currentIndex) / total) * 100}%`;
+
+      // Category badge
+      const badge = document.getElementById('badge-category');
+      if (current.type === 'muscle') {
+        badge.innerText = `Muskeltabell: Siffra ${current.num}`;
+        badge.className = 'inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2 bg-blue-100 text-blue-700';
+      } else {
+        badge.innerText = `Skelettabell: Siffra ${current.num}`;
+        badge.className = 'inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2 bg-amber-100 text-amber-800';
+      }
+
+      // Title & Subtitle
+      document.getElementById('question-text').innerText = `Vilken ${current.type === 'muscle' ? 'muskel' : 'skelettdel'} är siffra ${current.num}?`;
+      
+      const sub = document.getElementById('question-subtext');
+      if (current.swe) {
+        sub.innerText = `Svenskt namn i häftet: "${current.swe}"`;
+        sub.classList.remove('hidden');
+      } else {
+        sub.classList.add('hidden');
+      }
+
+      // Create 4 choices (1 correct + 3 distractor choices)
+      let choicesPool = anatomyData.filter(i => i.latin !== current.latin);
+      choicesPool = shuffle(choicesPool).slice(0, 3);
+      let choices = shuffle([current, ...choicesPool]);
+
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-slate-50 hover:border-indigo-400 hover:bg-white text-slate-800 font-semibold transition text-base flex justify-between items-center';
+        btn.innerHTML = `<span>${choice.latin}</span>`;
+        btn.onclick = () => checkAnswer(choice.latin, current, btn);
+        container.appendChild(btn);
+      });
+
+      // Hide feedback & next button
+      document.getElementById('feedback-box').className = 'hidden p-4 rounded-xl mb-6 text-sm';
+      document.getElementById('next-btn').classList.add('hidden');
+    }
+
+    function checkAnswer(selectedOption, currentItem, clickedBtn) {
+      if (answered) return;
+      answered = true;
+
+      const isCorrect = selectedOption === currentItem.latin;
+      if (isCorrect) score++;
+
+      history.push({
+        item: currentItem,
+        userAnswer: selectedOption,
+        isCorrect: isCorrect
+      });
+
+      const buttons = document.querySelectorAll('.opt-btn');
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        const text = btn.querySelector('span').innerText;
+        if (text === currentItem.latin) {
+          btn.className = 'w-full text-left p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-bold text-base flex justify-between items-center';
+          btn.innerHTML += ' <span class="text-emerald-600">✓ Rätt</span>';
+        } else if (text === selectedOption && !isCorrect) {
+          btn.className = 'w-full text-left p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-900 font-bold text-base flex justify-between items-center';
+          btn.innerHTML += ' <span class="text-rose-600">✗ Fel</span>';
+        } else {
+          btn.className = 'w-full text-left p-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-400 text-base opacity-60';
+        }
+      });
+
+      // Show Feedback Box
+      const feedback = document.getElementById('feedback-box');
+      const fbTitle = document.getElementById('feedback-title');
+      const fbDetail = document.getElementById('feedback-detail');
+
+      if (isCorrect) {
+        feedback.className = 'p-4 rounded-xl mb-6 text-sm bg-emerald-50 border border-emerald-200 text-emerald-800 block';
+        fbTitle.innerText = 'Rätt svar!';
+      } else {
+        feedback.className = 'p-4 rounded-xl mb-6 text-sm bg-rose-50 border border-rose-200 text-rose-800 block';
+        fbTitle.innerText = `Fel. Rätt svar är: ${currentItem.latin}`;
+      }
+
+      let detailText = `Siffra ${currentItem.num} i ${currentItem.type === 'muscle' ? 'muskeltabellen' : 'skelettabellen'}.`;
+      if (currentItem.swe) detailText += ` Svenskt namn: ${currentItem.swe}.`;
+      if (currentItem.action && currentItem.action !== 'Skelettdel') detailText += ` Funktion/Rörelse: ${currentItem.action}.`;
+      fbDetail.innerText = detailText;
+
+      document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex < quizQueue.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('card-box').classList.add('hidden');
+      document.getElementById('result-box').classList.remove('hidden');
+
+      const total = quizQueue.length;
+      const percent = Math.round((score / total) * 100);
+
+      document.getElementById('final-score').innerText = score;
+      document.getElementById('final-total').innerText = total;
+      document.getElementById('final-percent').innerText = `${percent}%`;
+
+      const emoji = document.getElementById('result-emoji');
+      if (percent >= 90) emoji.innerText = '🌟';
+      else if (percent >= 70) emoji.innerText = '👏';
+      else emoji.innerText = '📚';
+
+      const summaryList = document.getElementById('summary-list');
+      summaryList.innerHTML = '';
+
+      history.forEach((h, idx) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'py-2.5 px-3 flex items-center justify-between text-sm';
+        itemDiv.innerHTML = `
+          <div>
+            <span class="font-semibold text-slate-700">#${h.item.num} ${h.item.latin}</span>
+            ${h.item.swe ? `<span class="text-xs text-slate-400 block">(${h.item.swe})</span>` : ''}
+          </div>
+          <div class="text-right">
+            ${h.isCorrect 
+              ? `<span class="text-emerald-600 font-bold">✓ Rätt</span>` 
+              : `<span class="text-rose-600 font-bold">Ditt svar: ${h.userAnswer}</span>`}
+          </div>
+        `;
+        summaryList.appendChild(itemDiv);
+      });
+    }
+
+    function resetQuiz() {
+      document.getElementById('result-box').classList.add('hidden');
+      document.getElementById('setup-box').classList.remove('hidden');
+    }
+
+    function switchView(view) {
+      if (view === 'quiz') {
+        document.getElementById('quiz-view').classList.remove('hidden');
+        document.getElementById('study-view').classList.add('hidden');
+        document.getElementById('nav-quiz-btn').className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-white text-indigo-700 shadow-sm';
+        document.getElementById('nav-study-btn').className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-600';
+      } else {
+        document.getElementById('quiz-view').classList.add('hidden');
+        document.getElementById('study-view').classList.remove('hidden');
+        document.getElementById('nav-study-btn').className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-white text-indigo-700 shadow-sm';
+        document.getElementById('nav-quiz-btn').className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-600';
+        renderStudyList();
+      }
+    }
+
+    function renderStudyList() {
+      const query = document.getElementById('study-search').value.toLowerCase();
+      const container = document.getElementById('study-cards-container');
+      container.innerHTML = '';
+
+      const filtered = anatomyData.filter(item => 
+        item.latin.toLowerCase().includes(query) ||
+        item.swe.toLowerCase().includes(query) ||
+        item.num.toString() === query ||
+        item.action.toLowerCase().includes(query)
+      );
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between';
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${item.type === 'muscle' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-800'}">
+                ${item.type === 'muscle' ? 'Muskel' : 'Skelett'} #${item.num}
+              </span>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">${item.latin}</h3>
+            ${item.swe ? `<p class="text-xs font-medium text-slate-500 mb-2">${item.swe}</p>` : ''}
+            ${item.origin ? `<p class="text-xs text-slate-600 mt-2"><b>Ursprung:</b> ${item.origin} | <b>Fäste:</b> ${item.insertion}</p>` : ''}
+            ${item.action && item.action !== 'Skelettdel' ? `<p class="text-xs text-slate-600 mt-1"><b>Rörelse:</b> ${item.action}</p>` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>
