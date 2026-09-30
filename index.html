@@ -8,13 +8,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
+    .sticky-images {
+      position: sticky;
+      top: 1.5rem;
+    }
   </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col">
 
   <!-- Header -->
   <header class="bg-indigo-700 text-white shadow-md">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
       <div>
         <h1 class="text-2xl font-bold tracking-tight">Anatomiquiz</h1>
         <p class="text-indigo-200 text-xs sm:text-sm">Träna på alla muskler & ben utifrån ditt anatomihäfte</p>
@@ -30,115 +34,146 @@
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6">
+  <!-- Main Container med två kolumner på större skärmar -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- QUIZ VIEW -->
-    <div id="quiz-view" class="space-y-6">
+    <!-- BILDER SIDOPANEL (Visas bredvid quizet på desktop, ovanför/under på mobil) -->
+    <aside class="lg:col-span-5 order-2 lg:order-1">
+      <div class="sticky-images bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+          <span>📖</span> Anatomibilder från häftet
+        </h2>
+        <p class="text-xs text-slate-500">Jämför siffrorna i frågan med illustrationsbilderna nedan.</p>
 
-      <!-- Setup Box -->
-      <div id="setup-box" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-        <h2 class="text-xl font-bold mb-4 text-slate-800">Välj vad du vill öva på</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-          <button onclick="selectCategory('all')" id="cat-all" class="cat-btn border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-600">
-            <div class="text-lg">Alla frågor</div>
-            <div class="text-xs text-indigo-500 font-normal mt-1">43 frågor totalt</div>
-          </button>
-          <button onclick="selectCategory('muscles')" id="cat-muscles" class="cat-btn border-2 border-slate-200 bg-white text-slate-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-300">
-            <div class="text-lg">Endast Muskler</div>
-            <div class="text-xs text-slate-500 font-normal mt-1">24 muskler (siffra 1-24)</div>
-          </button>
-          <button onclick="selectCategory('skeleton')" id="cat-skeleton" class="cat-btn border-2 border-slate-200 bg-white text-slate-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-300">
-            <div class="text-lg">Endast Skelett</div>
-            <div class="text-xs text-slate-500 font-normal mt-1">19 ben/strukturer (1-19)</div>
-          </button>
-        </div>
-
-        <button onclick="startQuiz()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition transform active:scale-[0.99]">
-          Starta Quizet
-        </button>
-      </div>
-
-      <!-- Active Quiz Card -->
-      <div id="card-box" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 relative">
-        
-        <!-- Top bar: Progress & Score -->
-        <div class="flex justify-between items-center mb-4 text-sm font-medium text-slate-500">
-          <span id="question-count">Fråga 1 av 10</span>
-          <span id="score-counter" class="text-indigo-600 font-semibold">Poäng: 0</span>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="w-full bg-slate-100 rounded-full h-2.5 mb-6 overflow-hidden">
-          <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-        </div>
-
-        <!-- Question Title -->
-        <div class="mb-6">
-          <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2" id="badge-category">
-            Muskeltabell
+        <!-- Bild 1: Framsida -->
+        <div class="border border-slate-100 rounded-xl overflow-hidden bg-slate-50">
+          <div class="p-2 bg-slate-100 text-xs font-semibold text-slate-600 text-center border-b border-slate-200">
+            Framsida (Anterior) & Skelett/Muskel
           </div>
-          <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800">
-            Vilken muskel motsvaras av siffra 3?
-          </h2>
-          <p id="question-subtext" class="text-slate-500 text-sm mt-1">
-            Svenskt namn: Tvåhövdade armböjaren
-          </p>
+          <img src="Bild1.png" onError="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1L9-4-g9YvA1e4Xw_13';" alt="Anatomihäfte Framsida" class="w-full h-auto object-contain max-h-[500px]">
         </div>
 
-        <!-- Options Container -->
-        <div id="options-container" class="grid grid-cols-1 gap-3 mb-6">
-          <!-- Dynamiskt skapade alternativ -->
-        </div>
-
-        <!-- Explanation / Feedback Box -->
-        <div id="feedback-box" class="hidden p-4 rounded-xl mb-6 text-sm">
-          <div id="feedback-title" class="font-bold mb-1"></div>
-          <div id="feedback-detail" class="text-slate-600"></div>
-        </div>
-
-        <!-- Next Button -->
-        <button id="next-btn" onclick="nextQuestion()" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition">
-          Nästa fråga →
-        </button>
-      </div>
-
-      <!-- Results View -->
-      <div id="result-box" class="hidden bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center">
-        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-100 text-indigo-600 text-3xl mb-4 font-extrabold" id="result-emoji">
-          🏆
-        </div>
-        <h2 class="text-2xl font-bold text-slate-800 mb-2">Quizet är klart!</h2>
-        <p class="text-slate-600 mb-6">Du fick <span id="final-score" class="font-bold text-indigo-600">0</span> av <span id="final-total">0</span> rätt (<span id="final-percent">0%</span>).</p>
-
-        <!-- Result Breakdown list -->
-        <div class="text-left mb-6 max-h-80 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 p-2" id="summary-list">
-          <!-- Dynamisk sammanfattning -->
-        </div>
-
-        <button onclick="resetQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition">
-          Kör igen
-        </button>
-      </div>
-
-    </div>
-
-    <!-- STUDY LIST VIEW -->
-    <div id="study-view" class="hidden space-y-6">
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h2 class="text-xl font-bold text-slate-800">Studielista för häftet</h2>
-            <p class="text-slate-500 text-sm">Sök eller bläddra bland alla muskler och ben</p>
+        <!-- Bild 2: Baksida -->
+        <div class="border border-slate-100 rounded-xl overflow-hidden bg-slate-50">
+          <div class="p-2 bg-slate-100 text-xs font-semibold text-slate-600 text-center border-b border-slate-200">
+            Baksida (Posterior) & Muskler
           </div>
-          <input type="text" id="study-search" oninput="renderStudyList()" placeholder="Sök muskel/ben/siffra..." class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="study-cards-container">
-          <!-- Skapas dynamiskt -->
+          <img src="Bild2.png" onError="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1L9-4-g9YvA1e4Xw_24';" alt="Anatomihäfte Baksida" class="w-full h-auto object-contain max-h-[500px]">
         </div>
       </div>
-    </div>
+    </aside>
+
+    <!-- QUIZ / STUDY CONTENT (Huvudinnehåll) -->
+    <section class="lg:col-span-7 order-1 lg:order-2">
+
+      <!-- QUIZ VIEW -->
+      <div id="quiz-view" class="space-y-6">
+
+        <!-- Setup Box -->
+        <div id="setup-box" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+          <h2 class="text-xl font-bold mb-4 text-slate-800">Välj vad du vill öva på</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+            <button onclick="selectCategory('all')" id="cat-all" class="cat-btn border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-600">
+              <div class="text-lg">Alla frågor</div>
+              <div class="text-xs text-indigo-500 font-normal mt-1">43 frågor totalt</div>
+            </button>
+            <button onclick="selectCategory('muscles')" id="cat-muscles" class="cat-btn border-2 border-slate-200 bg-white text-slate-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-300">
+              <div class="text-lg">Endast Muskler</div>
+              <div class="text-xs text-slate-500 font-normal mt-1">24 muskler (siffra 1-24)</div>
+            </button>
+            <button onclick="selectCategory('skeleton')" id="cat-skeleton" class="cat-btn border-2 border-slate-200 bg-white text-slate-700 font-semibold p-4 rounded-xl text-center transition hover:border-indigo-300">
+              <div class="text-lg">Endast Skelett</div>
+              <div class="text-xs text-slate-500 font-normal mt-1">19 ben/strukturer (1-19)</div>
+            </button>
+          </div>
+
+          <button onclick="startQuiz()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition transform active:scale-[0.99]">
+            Starta Quizet
+          </button>
+        </div>
+
+        <!-- Active Quiz Card -->
+        <div id="card-box" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 relative">
+          
+          <!-- Top bar: Progress & Score -->
+          <div class="flex justify-between items-center mb-4 text-sm font-medium text-slate-500">
+            <span id="question-count">Fråga 1 av 10</span>
+            <span id="score-counter" class="text-indigo-600 font-semibold">Poäng: 0</span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-2.5 mb-6 overflow-hidden">
+            <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+
+          <!-- Question Title -->
+          <div class="mb-6">
+            <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2" id="badge-category">
+              Muskeltabell
+            </div>
+            <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800">
+              Vilken muskel motsvaras av siffra 3?
+            </h2>
+            <p id="question-subtext" class="text-slate-500 text-sm mt-1">
+              Svenskt namn: Tvåhövdade armböjaren
+            </p>
+          </div>
+
+          <!-- Options Container -->
+          <div id="options-container" class="grid grid-cols-1 gap-3 mb-6">
+            <!-- Dynamiskt skapade alternativ -->
+          </div>
+
+          <!-- Explanation / Feedback Box -->
+          <div id="feedback-box" class="hidden p-4 rounded-xl mb-6 text-sm">
+            <div id="feedback-title" class="font-bold mb-1"></div>
+            <div id="feedback-detail" class="text-slate-600"></div>
+          </div>
+
+          <!-- Next Button -->
+          <button id="next-btn" onclick="nextQuestion()" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition">
+            Nästa fråga →
+          </button>
+        </div>
+
+        <!-- Results View -->
+        <div id="result-box" class="hidden bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-100 text-indigo-600 text-3xl mb-4 font-extrabold" id="result-emoji">
+            🏆
+          </div>
+          <h2 class="text-2xl font-bold text-slate-800 mb-2">Quizet är klart!</h2>
+          <p class="text-slate-600 mb-6">Du fick <span id="final-score" class="font-bold text-indigo-600">0</span> av <span id="final-total">0</span> rätt (<span id="final-percent">0%</span>).</p>
+
+          <!-- Result Breakdown list -->
+          <div class="text-left mb-6 max-h-80 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 p-2" id="summary-list">
+            <!-- Dynamisk sammanfattning -->
+          </div>
+
+          <button onclick="resetQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition">
+            Kör igen
+          </button>
+        </div>
+
+      </div>
+
+      <!-- STUDY LIST VIEW -->
+      <div id="study-view" class="hidden space-y-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-slate-800">Studielista för häftet</h2>
+              <p class="text-slate-500 text-sm">Sök eller bläddra bland alla muskler och ben</p>
+            </div>
+            <input type="text" id="study-search" oninput="renderStudyList()" placeholder="Sök muskel/ben/siffra..." class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="study-cards-container">
+            <!-- Skapas dynamiskt -->
+          </div>
+        </div>
+      </div>
+
+    </section>
 
   </main>
 
@@ -431,7 +466,7 @@
             </div>
             <h3 class="font-bold text-slate-800 text-base">${item.latin}</h3>
             ${item.swe ? `<p class="text-xs font-medium text-slate-500 mb-2">${item.swe}</p>` : ''}
-            ${item.origin ? `<p class="text-xs text-slate-600 mt-2"><b>Ursprung:</b> ${item.origin} | <b>Fäste:</b> ${item.insertion}</p>` : ''}
+            ${item.origin ? `<p class="text-xs text-slate-600 mt-2"><b>Ursprung:</b> ${item.origin} \vert{} <b>Fäste:</b> ${item.insertion}</p>` : ''}
             ${item.action && item.action !== 'Skelettdel' ? `<p class="text-xs text-slate-600 mt-1"><b>Rörelse:</b> ${item.action}</p>` : ''}
           </div>
         `;
